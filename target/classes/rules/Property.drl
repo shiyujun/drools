@@ -1,0 +1,39 @@
+package rules;
+import cn.org.zhixiang.entity.User;
+
+rule "salience2"
+salience 2
+    when
+        eval(true)
+    then
+        System.err.println("salience2");
+end
+
+rule "salience1"
+salience 1
+    when
+        eval(true)
+    then
+        System.err.println("salience1");
+end
+
+rule "dateEffective"
+date-effective "2018-11-24"
+    when
+    then
+        System.err.println("2018-11-24被执行");
+end
+
+rule "dateEffectiveTomorrow"
+date-effective "2018-11-25"
+    when
+    then
+        System.err.println("2018-11-25被执行");
+end
+
+rule "enabled"
+enabled false
+    when
+    then
+        System.err.println("被禁用的规则");
+end

@@ -41,6 +41,7 @@ public class RulesUtil {
     }
 
     public static KieServices getKieServices() {
+        System.setProperty("drools.dateformat","yyyy-MM-dd");
         return KieServices.Factory.get();
     }
 }

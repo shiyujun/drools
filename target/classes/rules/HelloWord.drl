@@ -1,0 +1,42 @@
+package rules;
+import cn.org.zhixiang.entity.User;
+import java.lang.String;
+import java.util.List;
+
+rule "hello,word"
+    when
+        eval(true)
+    then
+        System.err.println("hello,word!");
+end
+
+rule "user"
+    when
+      $u:User(name=="张三",age==18)//连接符： && || ,
+    then
+        $u.setName("李四");
+        System.err.println("hello,word："+$u.getName());
+end
+
+rule "contains"
+    when
+      $s:String()
+      $u:User(name contains $s)
+    then
+        System.err.println("用户张三存在");
+end
+
+rule "memberOf"
+    when
+      $list:List()
+      $u:User(name memberOf $list)
+    then
+        System.err.println("用户李四存在");
+end
+
+rule "matches"
+    when
+      $u:User(name matches "张.*")
+    then
+        System.err.println("用户张xx存在");
+end
