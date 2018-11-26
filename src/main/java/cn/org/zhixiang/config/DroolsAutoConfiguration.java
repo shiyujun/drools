@@ -1,17 +1,20 @@
 package cn.org.zhixiang.config;
 
-import cn.org.zhixiang.entity.Dog;
-import org.drools.core.io.impl.UrlResource;
+import org.kie.api.KieBase;
 import org.kie.api.KieServices;
-import org.kie.api.builder.KieModule;
-import org.kie.api.builder.KieRepository;
+import org.kie.api.builder.*;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.internal.io.ResourceFactory;
+import org.kie.spring.KModuleBeanFactoryPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 
 /**
@@ -23,36 +26,58 @@ import java.io.InputStream;
  */
 @Configuration
 public class DroolsAutoConfiguration {
+    private static final String RULES_PATH = "rules/";
+
+    @Bean
+    @ConditionalOnMissingBean(KieFileSystem.class)
+    public KieFileSystem kieFileSystem() throws IOException {
+        KieFileSystem kieFileSystem = getKieServices().newKieFileSystem();
+        for (Resource file : getRuleFiles()) {
+            kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_PATH + file.getFilename(), "UTF-8"));
+        }
+        return kieFileSystem;
+    }
+
+    private Resource[] getRuleFiles() throws IOException {
+        ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+        return resourcePatternResolver.getResources("classpath*:" + RULES_PATH + "**/*.*");
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(KieContainer.class)
+    public KieContainer kieContainer() throws IOException {
+        final KieRepository kieRepository = getKieServices().getRepository();
+        kieRepository.addKieModule(new KieModule() {
+            public ReleaseId getReleaseId() {
+                return kieRepository.getDefaultReleaseId();
+            }
+        });
+        KieBuilder kieBuilder = getKieServices().newKieBuilder(kieFileSystem());
+        kieBuilder.buildAll();
+        return getKieServices().newKieContainer(kieRepository.getDefaultReleaseId());
+    }
 
 
     @Bean
-    public KieSession kieSession() throws IOException {
-        System.setProperty("drools.dateformat", "yyyy-MM-dd");
-        String url = "http://10.0.20.135:8080/drools-wb/maven2/cn/org/zhixiang/drools-test/0.0.1/drools-test-0.0.1.jar";
-        KieServices kieServices = KieServices.Factory.get();
-        KieRepository kieRepository = kieServices.getRepository();
-        UrlResource resource = (UrlResource) kieServices.getResources().newUrlResource(url);
-        resource.setBasicAuthentication("enabled");
-        resource.setPassword("admin");
-        resource.setUsername("admin");
-        InputStream is = null;
-        try {
-            is = resource.getInputStream();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        KieModule kieModule = kieRepository.addKieModule(kieServices.getResources().newInputStreamResource(is));
-        KieContainer kieContainer = kieServices.newKieContainer(kieModule.getReleaseId());
+    @ConditionalOnMissingBean(KieBase.class)
+    public KieBase kieBase() throws IOException {
+        return kieContainer().getKieBase();
+    }
 
-        KieSession kieSession =kieContainer.newKieSession();
+    @Bean
+    @ConditionalOnMissingBean(KieSession.class)
+    public KieSession kieSession() throws IOException {
+        KieSession kieSession = kieContainer().newKieSession();
         return kieSession;
     }
+
     @Bean
-    public Dog dog() throws IOException {
-       return new Dog();
+    @ConditionalOnMissingBean(KModuleBeanFactoryPostProcessor.class)
+    public KModuleBeanFactoryPostProcessor kiePostProcessor() {
+        return new KModuleBeanFactoryPostProcessor();
     }
-
-
-
-
+    public KieServices getKieServices() {
+        System.setProperty("drools.dateformat","yyyy-MM-dd");
+        return KieServices.Factory.get();
+    }
 }

@@ -1,7 +1,7 @@
 package cn.org.zhixiang;
 
+
 import cn.org.zhixiang.entity.Dog;
-import cn.org.zhixiang.entity.User;
 import org.drools.compiler.kproject.ReleaseIdImpl;
 import org.drools.core.io.impl.UrlResource;
 import org.junit.Test;
@@ -9,7 +9,9 @@ import org.junit.runner.RunWith;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieModule;
 import org.kie.api.builder.KieRepository;
+
 import org.kie.api.builder.KieScanner;
+import org.kie.api.builder.ReleaseId;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -22,7 +24,7 @@ public class DroolsApplicationWorkBenchTests {
 
 
     @Test
-    public void testHelloWord() {
+    public void testWorkbench() {
         String url = "http://10.0.20.135:8080/drools-wb/maven2/cn/org/zhixiang/drools-test/0.0.1/drools-test-0.0.1.jar";
         KieServices kieServices = KieServices.Factory.get();
         KieRepository kieRepository = kieServices.getRepository();
@@ -44,6 +46,7 @@ public class DroolsApplicationWorkBenchTests {
         kieSession.insert(dog);
         kieSession.fireAllRules();
     }
+
 
 
 }

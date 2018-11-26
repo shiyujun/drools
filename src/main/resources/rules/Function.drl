@@ -1,7 +1,5 @@
 package rules;
 import cn.org.zhixiang.entity.User
-import org.drools.core.WorkingMemory
-import org.drools.core.definitions;
 
 rule "test1"
     when
