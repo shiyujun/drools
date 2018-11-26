@@ -21,8 +21,6 @@ import java.io.InputStream;
 
 @RunWith(SpringRunner.class)
 public class DroolsApplicationWorkBenchTests {
-
-
     @Test
     public void testWorkbench() {
         String url = "http://10.0.20.135:8080/drools-wb/maven2/cn/org/zhixiang/drools-test/0.0.1/drools-test-0.0.1.jar";
@@ -42,11 +40,8 @@ public class DroolsApplicationWorkBenchTests {
         KieContainer kieContainer = kieServices.newKieContainer(kieModule.getReleaseId());
         KieSession kieSession = kieContainer.newKieSession();
         Dog dog = new Dog();
-        dog.setName("小黄");
+        dog.setName("大黄");
         kieSession.insert(dog);
         kieSession.fireAllRules();
     }
-
-
-
 }
